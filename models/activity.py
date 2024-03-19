@@ -8,5 +8,10 @@ class Activity:
         self.user_id = user_id
 
     def to_json(self):
-        return {'id': self.id, 'name': self.name, 'description': self.description, 'duration': self.duration,
-                'date': self.date, 'user_id': self.user_id}
+        return {'id': self.id,
+                'name': self.name,
+                'description': self.description,
+                'duration': self.duration,
+                'date': self.date,
+                'user_id': self.user_id
+                }

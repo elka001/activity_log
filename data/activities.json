@@ -1,0 +1,42 @@
+[
+    {
+        "id": 1,
+        "name": "Cardio",
+        "description": "Running",
+        "duration": "00:30",
+        "date": "2024-03-17",
+        "user_id": 1
+    },
+    {
+        "id": 2,
+        "name": "Gym",
+        "description": "Heavy lifting",
+        "duration": "00:45",
+        "date": "2024-03-18",
+        "user_id": 1
+    },
+    {
+        "id": 3,
+        "name": "Yoga",
+        "description": "Warm up",
+        "duration": "01:00",
+        "date": "2024-03-19",
+        "user_id": 2
+    },
+    {
+        "id": 4,
+        "name": "Cardio",
+        "description": "Walking",
+        "duration": "00:30",
+        "date": "2024-03-19",
+        "user_id": 2
+    },
+    {
+        "id": 5,
+        "name": "Cardio",
+        "description": "Swimming",
+        "duration": "00:40",
+        "date": "2024-03-18",
+        "user_id": 1
+    }
+]
