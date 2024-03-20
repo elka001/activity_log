@@ -1,5 +1,7 @@
 from flask import Flask, request
-from flask_restx import Api, Resource, Namespace, abort, fields
+from flask_restx import Api, Resource, abort
+from models.activity import activity_ns, activity_model
+from models.user import user_ns, user_model
 from utils import load_data, get_next_id, save_and_respond, find_item_by_id
 
 # ENDPOINTS
@@ -18,25 +20,6 @@ api = Api(app,
           version='1.0',
           title='Activity Log API',
           description='A simple API for managing and logging your daily activities!')
-
-# NAMESPACES
-user_ns = Namespace('users', description='Operations related to users:')
-activity_ns = Namespace('activities', description='Operations related to activities:')
-
-activity_model = activity_ns.model('Activity', {
-    'id': fields.Integer(readonly=True, description='The unique identifier of an activity.'),
-    'name': fields.String(required=True, description='The name of an activity.'),
-    'description': fields.String(required=True, description='The description of an activity.'),
-    'duration': fields.String(required=True, description='The duration of an activity.'),
-    'date': fields.String(required=True, description='The date of an activity.'),
-    'user_id': fields.Integer(required=True, description='The ID of a user this activity belongs to.')
-})
-
-user_model = user_ns.model('User', {
-    'id': fields.Integer(readonly=True, description='The unique identifier of a user.'),
-    'username': fields.String(required=True, description='The username of a user.'),
-    'email': fields.String(required=True, description='The email address of a user.')
-})
 
 # INITIAL DATA
 users = load_data(USERS_FILE)
