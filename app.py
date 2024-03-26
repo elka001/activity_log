@@ -21,6 +21,7 @@ api = Api(app,
           title='Activity Log API',
           description='A simple API for managing and logging your daily activities!')
 
+
 # INITIAL DATA
 users = load_data(USERS_FILE)
 activities = load_data(ACTIVITIES_FILE)
@@ -51,13 +52,14 @@ class UserList(Resource):
             abort(400, 'A user with that email already exists.')
         new_user_data['id'] = get_next_id(current_users)
         current_users.append(new_user_data)
-        return save_and_respond(USERS_FILE, current_users, new_user_data, 201)
+        return save_and_respond(USERS_FILE, current_users, new_user_data, 201,
+                                headers={'Location': f'/users/{new_user_data["id"]}'})
 
 
 @user_ns.route('/<int:id>')
 @user_ns.param('id', 'The user identifier')
 @user_ns.response(404, 'User not found.')
-class UserController(Resource):
+class UserService(Resource):
     @user_ns.doc('get_user')
     @user_ns.marshal_with(user_model)
     def get(self, id):
@@ -78,7 +80,7 @@ class UserController(Resource):
         if user is None:
             abort(404, "User not found")
         user.update(request.json)
-        return save_and_respond(USERS_FILE, current_users, user)
+        return save_and_respond(USERS_FILE, current_users, user, headers={'Location': f'/users/{id}'})
 
     @user_ns.doc('delete_user')
     @user_ns.response(204, 'User successfully deleted.')
@@ -125,13 +127,14 @@ class ActivityList(Resource):
         new_activity_data = request.json
         new_activity_data['id'] = get_next_id(current_activities)
         current_activities.append(new_activity_data)
-        return save_and_respond(ACTIVITIES_FILE, current_activities, new_activity_data, 201)
+        return save_and_respond(ACTIVITIES_FILE, current_activities, new_activity_data, 201,
+                                headers={'Location': f'/activities/{new_activity_data["id"]}'})
 
 
 @activity_ns.route('/<int:id>')
 @activity_ns.param('id', 'The activity identifier')
 @activity_ns.response(404, 'Activity not found.')
-class ActivityController(Resource):
+class ActivityService(Resource):
     @activity_ns.doc('get_activity')
     @activity_ns.marshal_with(activity_model)
     def get(self, id):
@@ -153,7 +156,8 @@ class ActivityController(Resource):
             abort(404, "Activity not found.")
         update_data = request.json
         activity.update({k: v for k, v in update_data.items() if k != 'id'})
-        return save_and_respond(ACTIVITIES_FILE, current_activities, activity)
+        return save_and_respond(ACTIVITIES_FILE, current_activities, activity,
+                                headers={'Location': f'/activities/{id}'})
 
     @activity_ns.doc('delete_activity')
     @activity_ns.response(204, 'Activity successfully deleted.')
