@@ -1,7 +1,5 @@
 import json
 
-from flask import make_response, jsonify
-
 
 # Function to read data from a JSON file
 def load_data(filename):
@@ -27,10 +25,6 @@ def find_item_by_id(items, item_id):
     return next((item for item in items if item['id'] == item_id), None)
 
 
-def save_and_respond(save_file, items, item, status_code=200, headers=None):
+def save_and_respond(save_file, items, item, status_code=200):
     save_data(save_file, items)
-    response = make_response(jsonify(item), status_code)
-    if headers:
-        for header_name, header_value in headers.items():
-            response.headers[header_name] = header_value
-    return response
+    return item, status_code
