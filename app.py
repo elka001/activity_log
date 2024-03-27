@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_restx import Api, Resource, abort
 from models.activity import activity_ns, activity_model
 from models.user import user_ns, user_model
-from utils import load_data, get_next_id, save_and_respond, find_item_by_id
+from utils import load_data, get_next_id, save_and_respond, find_item_by_id, save_data
 
 # ENDPOINTS
 # /users
@@ -20,7 +20,6 @@ api = Api(app,
           version='1.0',
           title='Activity Log API',
           description='A simple API for managing and logging your daily activities!')
-
 
 # INITIAL DATA
 users = load_data(USERS_FILE)
@@ -52,8 +51,8 @@ class UserList(Resource):
             abort(400, 'A user with that email already exists.')
         new_user_data['id'] = get_next_id(current_users)
         current_users.append(new_user_data)
-        return save_and_respond(USERS_FILE, current_users, new_user_data, 201,
-                                headers={'Location': f'/users/{new_user_data["id"]}'})
+        save_data(USERS_FILE, current_users)
+        return new_user_data, 201, {'Location': f'/users/{new_user_data["id"]}'}
 
 
 @user_ns.route('/<int:id>')
@@ -77,10 +76,11 @@ class UserService(Resource):
         """Update a user's information by their ID"""
         current_users = load_data(USERS_FILE)
         user = find_item_by_id(current_users, id)
-        if user is None:
-            abort(404, "User not found")
+        if not user:
+            abort(404, "User not found.")
         user.update(request.json)
-        return save_and_respond(USERS_FILE, current_users, user, headers={'Location': f'/users/{id}'})
+        save_data(USERS_FILE, current_users)
+        return user, 200, {'Location': f'/users/{id}'}
 
     @user_ns.doc('delete_user')
     @user_ns.response(204, 'User successfully deleted.')
@@ -127,8 +127,8 @@ class ActivityList(Resource):
         new_activity_data = request.json
         new_activity_data['id'] = get_next_id(current_activities)
         current_activities.append(new_activity_data)
-        return save_and_respond(ACTIVITIES_FILE, current_activities, new_activity_data, 201,
-                                headers={'Location': f'/activities/{new_activity_data["id"]}'})
+        save_data(ACTIVITIES_FILE, current_activities)
+        return new_activity_data, 201, {'Location': f'/activities/{new_activity_data["id"]}'}
 
 
 @activity_ns.route('/<int:id>')
@@ -152,12 +152,13 @@ class ActivityService(Resource):
         """Update an activity's details by its ID"""
         current_activities = load_data(ACTIVITIES_FILE)
         activity = find_item_by_id(current_activities, id)
-        if activity is None:
+        if not activity:
             abort(404, "Activity not found.")
-        update_data = request.json
-        activity.update({k: v for k, v in update_data.items() if k != 'id'})
-        return save_and_respond(ACTIVITIES_FILE, current_activities, activity,
-                                headers={'Location': f'/activities/{id}'})
+        for key in request.json:
+            if key != 'id':
+                activity[key] = request.json[key]
+        save_data(ACTIVITIES_FILE, current_activities)
+        return activity, 200, {'Location': f'/activities/{id}'}
 
     @activity_ns.doc('delete_activity')
     @activity_ns.response(204, 'Activity successfully deleted.')
