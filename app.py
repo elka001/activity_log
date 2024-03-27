@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_restx import Api, Resource, abort
 from models.activity import activity_ns, activity_model
 from models.user import user_ns, user_model
-from utils import load_data, get_next_id, save_and_respond, find_item_by_id, save_data
+from utils import load_data, get_next_id, save_and_respond, find_item_by_id
 
 # ENDPOINTS
 # /users
@@ -51,8 +51,8 @@ class UserList(Resource):
             abort(400, 'A user with that email already exists.')
         new_user_data['id'] = get_next_id(current_users)
         current_users.append(new_user_data)
-        save_data(USERS_FILE, current_users)
-        return new_user_data, 201, {'Location': f'/users/{new_user_data["id"]}'}
+        return save_and_respond(USERS_FILE, current_users, new_user_data, 201,
+                                headers={'Location': f'/users/{new_user_data["id"]}'})
 
 
 @user_ns.route('/<int:id>')
@@ -79,8 +79,7 @@ class UserService(Resource):
         if not user:
             abort(404, "User not found.")
         user.update(request.json)
-        save_data(USERS_FILE, current_users)
-        return user, 200, {'Location': f'/users/{id}'}
+        return save_and_respond(USERS_FILE, current_users, user, headers={'Location': f'/users/{id}'})
 
     @user_ns.doc('delete_user')
     @user_ns.response(204, 'User successfully deleted.')
@@ -127,8 +126,8 @@ class ActivityList(Resource):
         new_activity_data = request.json
         new_activity_data['id'] = get_next_id(current_activities)
         current_activities.append(new_activity_data)
-        save_data(ACTIVITIES_FILE, current_activities)
-        return new_activity_data, 201, {'Location': f'/activities/{new_activity_data["id"]}'}
+        return save_and_respond(ACTIVITIES_FILE, current_activities, new_activity_data, 201,
+                                headers={'Location': f'/activities/{new_activity_data["id"]}'})
 
 
 @activity_ns.route('/<int:id>')
@@ -157,8 +156,8 @@ class ActivityService(Resource):
         for key in request.json:
             if key != 'id':
                 activity[key] = request.json[key]
-        save_data(ACTIVITIES_FILE, current_activities)
-        return activity, 200, {'Location': f'/activities/{id}'}
+        return save_and_respond(ACTIVITIES_FILE, current_activities, activity,
+                                headers={'Location': f'/activities/{id}'})
 
     @activity_ns.doc('delete_activity')
     @activity_ns.response(204, 'Activity successfully deleted.')
