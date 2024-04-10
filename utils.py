@@ -25,6 +25,6 @@ def find_item_by_id(items, item_id):
     return next((item for item in items if item['id'] == item_id), None)
 
 
-def save_and_respond(save_file, items, item, status_code=200):
+def save_and_respond(save_file, items, item, status_code=200, headers=None):
     save_data(save_file, items)
-    return item, status_code
+    return item, status_code, headers
